@@ -1,0 +1,334 @@
+using System;
+using System.Collections.Generic;
+
+// Class representing an online booking
+public class OnlineBooking
+{
+    // Properties of the OnlineBooking class
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public string PersonalNumber { get; set; }
+    public List<Product> Products { get; set; }
+    public DateTime OrderDate { get; set; }
+    public decimal TotalCost { get; set; }
+
+    // Constructor to initialize OnlineBooking objects
+    public OnlineBooking(string firstName, string lastName, string personalNumber, List<Product> products)
+    {
+        FirstName = firstName;
+        LastName = lastName;
+        PersonalNumber = personalNumber;
+        Products = products;
+        OrderDate = GenerateRandomOrderDate(); // Generate random order date
+        TotalCost = CalculateTotalCost(); // Calculate total cost of the products
+    }
+
+    // Method to generate a random order date
+    private DateTime GenerateRandomOrderDate()
+    {
+        Random rnd = new Random();
+        int year = DateTime.Now.Year;
+        int month = 9; // September
+        int day = DateTime.IsLeapYear(year) ? 12 : 13;
+        int hour = rnd.Next(0, 24);
+        int minute = rnd.Next(0, 60);
+        int second = rnd.Next(0, 60);
+        return new DateTime(year, month, day, hour, minute, second);
+    }
+
+    // Method to calculate the total cost of the products
+    private decimal CalculateTotalCost()
+    {
+        decimal total = 0;
+        foreach (var product in Products)
+        {
+            total += product.Quantity * product.Price;
+        }
+        return total;
+    }
+
+    // Method to check if the order is eligible for a discount
+    public bool IsEligibleForDiscount()
+    {
+        DateTime discountStart = new DateTime(OrderDate.Year, OrderDate.Month, OrderDate.Day, 0, 0, 0);
+        DateTime discountEnd = discountStart.AddMinutes(256); // Discount period
+        return OrderDate >= discountStart && OrderDate <= discountEnd && Products.Count == 2;
+    }
+
+    // Method to apply a discount to the total cost
+    public void ApplyDiscount()
+    {
+        if (IsEligibleForDiscount())
+        {
+            TotalCost *= 0.92m; // 8% discount
+        }
+    }
+
+    // Override ToString method to provide a string representation of the object
+    public override string ToString()
+    {
+        string productDetails = string.Join(", ", Products);
+        return $"{FirstName} {LastName}, Personal Number: {PersonalNumber}, Order Date: {OrderDate}, Total Cost: {TotalCost:C}, Products: [{productDetails}]";
+    }
+}
+
+// Class representing a product
+public class Product
+{
+    // Properties of the Product class
+    public string Name { get; set; }
+    public string Code { get; set; }
+    public int Quantity { get; set; }
+    public decimal Price { get; set; }
+
+    // Constructor to initialize Product objects
+    public Product(string name, string code, int quantity, decimal price)
+    {
+        Name = name;
+        Code = code;
+        Quantity = quantity;
+        Price = price;
+    }
+
+    // Override ToString method to provide a string representation of the object
+    public override string ToString()
+    {
+        return $"{Name} (Code: {Code}, Quantity: {Quantity}, Price: {Price:C})";
+    }
+}
+
+public class Program
+{
+    public static void Main()
+    {
+        // Creating a list of OnlineBooking objects
+        List<OnlineBooking> orders = new List<OnlineBooking>
+        {
+            new OnlineBooking("John", "Doe", "123456789", new List<Product>
+            {
+                new Product("Laptop", "P001", 1, 1500.00m),
+                new Product("Mouse", "P002", 1, 50.00m)
+            }),
+            new OnlineBooking("Jane", "Smith", "987654321", new List<Product>
+            {
+                new Product("Monitor", "P003", 2, 200.00m)
+            }),
+            new OnlineBooking("Alice", "Johnson", "555444333", new List<Product>
+            {
+                new Product("Keyboard", "P004", 1, 100.00m),
+                new Product("Headphones", "P005", 1, 75.00m)
+            })
+        };
+
+        // Iterate through each order and apply discount if eligible
+        foreach (var order in orders)
+        {
+            if (order.IsEligibleForDiscount())
+            {
+                order.ApplyDiscount();
+                Console.WriteLine(order.ToString());
+            }
+        }
+    }
+}
+
+
+-----------------------------------------------------------------------------------------------------------
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+
+public class Lecturer : IEnumerable, IEnumerator, IComparable<Lecturer>, IComparer<Lecturer>, IEquatable<Lecturer>
+{
+    // Properties of the Lecturer class
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public string PersonalNumber { get; set; }
+    public int WorkExperience { get; set; }
+    public int NumberOfPublishedArticles { get; set; }
+
+    // Field for IEnumerator implementation
+    private int position = -1;
+
+    // Constructor to initialize Lecturer objects
+    public Lecturer(string firstName, string lastName, string personalNumber, int workExperience, int numberOfPublishedArticles)
+    {
+        FirstName = firstName;
+        LastName = lastName;
+        PersonalNumber = personalNumber;
+        WorkExperience = workExperience;
+        NumberOfPublishedArticles = numberOfPublishedArticles;
+    }
+
+    // Implementation of IEnumerable
+    public IEnumerator GetEnumerator()
+    {
+        return this;
+    }
+
+    // Implementation of IEnumerator
+    public bool MoveNext()
+    {
+        position++;
+        return (position < 1); // Only one item to iterate (self)
+    }
+
+    public void Reset()
+    {
+        position = -1;
+    }
+
+    public object Current
+    {
+        get
+        {
+            if (position == 0)
+                return this;
+            throw new InvalidOperationException();
+        }
+    }
+
+    // Implementation of IComparable
+    public int CompareTo(Lecturer other)
+    {
+        if (other == null) return 1;
+        return this.NumberOfPublishedArticles.CompareTo(other.NumberOfPublishedArticles);
+    }
+
+    // Implementation of IComparer
+    public int Compare(Lecturer x, Lecturer y)
+    {
+        if (x == null || y == null)
+            return 0;
+        return x.LastName.CompareTo(y.LastName);
+    }
+
+    // Implementation of IEquatable
+    public bool Equals(Lecturer other)
+    {
+        if (other == null) return false;
+        return this.PersonalNumber == other.PersonalNumber;
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (obj == null) return false;
+        Lecturer objAsLecturer = obj as Lecturer;
+        if (objAsLecturer == null) return false;
+        else return Equals(objAsLecturer);
+    }
+
+    public override int GetHashCode()
+    {
+        return PersonalNumber.GetHashCode();
+    }
+
+    public static void Main(string[] args)
+    {
+        // Creating a list of Lecturer objects
+        List<Lecturer> lecturers = new List<Lecturer>
+        {
+            new Lecturer("Alice", "Smith", "001", 10, 5),
+            new Lecturer("Bob", "Brown", "002", 15, 10),
+            new Lecturer("Charlie", "Davis", "003", 5, 8)
+        };
+
+        // Sort by number of published articles (decreasing)
+        var sortedByArticles = lecturers.OrderByDescending(l => l.NumberOfPublishedArticles).ToList();
+        Console.WriteLine("Sorted by number of published articles (decreasing):");
+        foreach (var lecturer in sortedByArticles)
+        {
+            Console.WriteLine($"{lecturer.FirstName} {lecturer.LastName}, Articles: {lecturer.NumberOfPublishedArticles}");
+        }
+
+        // Sort by last name in alphabetical order
+        var sortedByLastName = lecturers.OrderBy(l => l.LastName).ToList();
+        Console.WriteLine("\nSorted by last name (alphabetical):");
+        foreach (var lecturer in sortedByLastName)
+        {
+            Console.WriteLine($"{lecturer.FirstName} {lecturer.LastName}");
+        }
+
+        // Sort by work experience (decreasing)
+        var sortedByExperience = lecturers.OrderByDescending(l => l.WorkExperience).ToList();
+        Console.WriteLine("\nSorted by work experience (decreasing):");
+        foreach (var lecturer in sortedByExperience)
+        {
+            Console.WriteLine($"{lecturer.FirstName} {lecturer.LastName}, Experience: {lecturer.WorkExperience}");
+        }
+    }
+}
+
+----------------------------------------------------------------------------------------------------------
+
+List<int> numbers = new List<int>();
+numbers.Add(1);           // Add item
+numbers.Insert(0, 0);     // Insert item at index 0
+bool contains = numbers.Contains(1); // Search item
+numbers.Remove(1);        // Remove item
+
+---------------------------------------------------------------------------------------------------------
+
+public interface IExample
+{
+    void ExampleMethod();
+}
+
+public class ExampleClass : IExample
+{
+    public void ExampleMethod()
+    {
+        Console.WriteLine("Method implemented.");
+    }
+}
+
+-------------------------------------------------------
+
+public class MyCollection : IEnumerable
+{
+    private int[] data = { 1, 2, 3 };
+
+    public IEnumerator GetEnumerator()
+    {
+        return data.GetEnumerator();
+    }
+}
+
+-----------------------------------------------------------
+
+public class Person : IComparable<Person>
+{
+    public string Name { get; set; }
+
+    public int CompareTo(Person other)
+    {
+        return this.Name.CompareTo(other.Name);
+    }
+}
+
+---------------------------------------------------------
+
+public class Person : ICloneable
+{
+    public string Name { get; set; }
+
+    public object Clone()
+    {
+        return this.MemberwiseClone();
+    }
+}
+
+-------------------------------------------------------------
+
+public class Person : IEquatable<Person>
+{
+    public string Name { get; set; }
+
+    public bool Equals(Person other)
+    {
+        return this.Name == other.Name;
+    }
+}
+
